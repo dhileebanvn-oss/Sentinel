@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sentinel – Smart Gate Control</title>
+<style>
+:root{--bg:#eceff4;--card:#fff;--ink:#10203d;--mut:#5d6a80;--line:#dce1ea;--nav:#12284d;--g:#1f9d5c;--r:#d93f33;--b:#1f6fe0;--s:#44546f;--y:#ffc400;--inp:#f6f8fb;--sh:0 1px 2px rgba(16,32,61,.06),0 10px 24px rgba(16,32,61,.09);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1422;--card:#172034;--ink:#eef1f7;--mut:#9ba8bf;--line:#28344c;--nav:#0a1630;--inp:#0f1727;--sh:0 1px 2px rgba(0,0,0,.3),0 10px 24px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg:#0d1422;--card:#172034;--ink:#eef1f7;--mut:#9ba8bf;--line:#28344c;--nav:#0a1630;--inp:#0f1727;--sh:0 1px 2px rgba(0,0,0,.3),0 10px 24px rgba(0,0,0,.35)}
+*{box-sizing:border-box}html,body{margin:0}[hidden]{display:none!important}
+body{background:var(--bg) repeating-linear-gradient(135deg,rgba(120,135,165,.07) 0 2px,transparent 2px 9px);color:var(--ink);font:16px/1.45 'Barlow',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+h1,h2,.tile b,.stat b,.kp b,.hero h2,.cnd{font-family:'Barlow Condensed','Arial Narrow',system-ui,sans-serif}
+header{background:linear-gradient(180deg,#183563,var(--nav));color:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+header::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:6px;background:repeating-linear-gradient(135deg,var(--y) 0 10px,#10203d 10px 20px)}
+header .logo{width:30px;height:30px;flex:none}
+header h1{font-size:26px;font-weight:700;margin:0;flex:1;letter-spacing:.8px;line-height:1}
+header .chip{font-size:12.5px;background:rgba(255,255,255,.14);padding:5px 11px;border-radius:99px;max-width:44vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header button{background:rgba(255,255,255,.14);border:0;color:#fff;font:600 13px 'Barlow',sans-serif;padding:7px 12px;border-radius:99px;cursor:pointer}
+header #back{font-size:22px;line-height:1;padding:3px 12px 5px}
+main{max-width:760px;margin:0 auto;padding:22px 14px 40px}
+.hero{background:linear-gradient(135deg,#183a73,#0f2147);color:#fff;border-radius:20px;padding:18px 18px 16px;margin-bottom:16px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:repeating-linear-gradient(135deg,var(--y) 0 10px,#10203d 10px 20px)}
+.hero small{opacity:.75;font-size:13.5px}.hero h2{font-size:32px;margin:0;font-weight:700;line-height:1.05}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 8px}
+.kp div{background:rgba(255,255,255,.1);border-radius:12px;padding:9px 10px}
+.kp b{font-size:30px;line-height:1;display:block;color:var(--y)}.kp span{font-size:12px;opacity:.85}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 10px 14px;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;cursor:pointer;color:var(--ink);font:inherit;transition:transform .12s}
+.tile:active{transform:scale(.97)}
+.tile i{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;margin-bottom:6px;background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--c) 72%,#fff),var(--c));box-shadow:0 0 0 4px var(--card),0 0 0 6px var(--c)}
+.tile svg{width:38px;height:38px;stroke:#fff;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tile b{font-size:21px;font-weight:700;line-height:1.1}.tile small{color:var(--mut);font-size:12.5px;line-height:1.25}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin:0 0 10px;box-shadow:var(--sh)}
+.card[class*=" s-"]{border-left:6px solid var(--sc)}.s-i{--sc:var(--g)}.s-w{--sc:#e0a100}.s-r{--sc:var(--r)}.s-o{--sc:#9aa5b8}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:center}.top b{font-size:17px}
+.sub{color:var(--mut);font-size:14px}.meta{font-size:13.5px;margin-top:3px}.meta.ap{color:var(--g)}.meta.ap.no{color:var(--r)}
+.pill{font-size:12px;padding:3px 11px;border-radius:99px;color:#fff;font-weight:600;white-space:nowrap}.pill.in{background:var(--g)}.pill.out{background:var(--s)}.pill.wait{background:#b07d00}.pill.rej{background:var(--r)}
+label{display:block;font-size:13px;font-weight:500;color:var(--mut);margin:13px 0 5px}
+input,select{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--inp);color:var(--ink);font:inherit}
+input:focus,select:focus{outline:2px solid var(--b);outline-offset:1px;border-color:transparent}
+.btn{border:0;border-radius:12px;padding:13px 18px;font:600 15px 'Barlow',sans-serif;color:#fff;background:var(--b);cursor:pointer;margin-top:12px;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.red{background:var(--r)}.btn.green{background:var(--g)}.btn.y{background:var(--y);color:#10203d;font-size:17px;width:100%}.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line);box-shadow:none}.btn.sm{padding:7px 13px;font-size:13px;margin:8px 8px 0 0}
+.btn.big{padding:18px 20px;font-size:18px;margin:0;min-width:112px;border-radius:13px}
+.cr{display:flex;gap:12px;align-items:stretch}.ci{flex:1;min-width:0}.cb{display:flex;flex-direction:column;justify-content:center;gap:8px}
+.det{border-top:1px dashed var(--line);margin-top:8px;padding-top:6px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:12px 14px;box-shadow:var(--sh)}
+.stat b{font-size:38px;display:block;line-height:1;font-weight:700}.stat span{font-size:13px;color:var(--mut)}button.stat{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}button.stat span::after{content:' ›'}button.stat:active{transform:scale(.98)}
+h2{font-size:22px;font-weight:700;margin:20px 0 10px;letter-spacing:.3px}.note{color:var(--mut);font-size:12.5px;margin-top:18px;text-align:center}
+.modal{position:fixed;inset:0;background:rgba(5,12,28,.6);backdrop-filter:blur(3px);display:grid;place-items:center;padding:16px;z-index:20}
+.modal>div{background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:420px;max-height:90vh;overflow:auto}
+.modal img{width:100%;border-radius:12px}.prev{width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin-top:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row select{width:auto;flex:1;min-width:110px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:13px 20px;border-radius:12px;color:#fff;font-weight:600;z-index:30;max-width:90%;box-shadow:0 8px 24px rgba(0,0,0,.35)}.toast.ok{background:var(--g)}.toast.bad{background:var(--r)}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:10px 0;padding-bottom:2px}.tabs button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:8px 15px;font:600 14px 'Barlow',sans-serif;cursor:pointer}.tabs button.on{background:var(--nav);color:#fff;border-color:var(--nav)}
+body.auth{background:linear-gradient(180deg,#183a73 0,#0b1a38 60%)}body.auth header{display:none}body.auth main{padding:0 0 30px;max-width:460px}
+.lg-top{padding:34px 22px 0;color:#fff;text-align:center}.lg-top h1{font-size:60px;font-weight:700;letter-spacing:2px;margin:0;line-height:1}.lg-top h1 span{color:var(--y)}
+.lg-top p{margin:8px 0 0;opacity:.8;font-size:15px}.ill{width:100%;height:auto;display:block;margin:6px 0 -14px}
+.lg-card{background:var(--card);color:var(--ink);border-radius:22px;margin:0 14px;padding:8px 20px 22px;box-shadow:0 18px 40px rgba(0,0,0,.4)}
+.lg-card h2{margin:12px 0 0;font-size:26px}.lg-card .note{margin-top:14px}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"></head><body>
+<header><button id="back" hidden data-act="go" data-v="home" aria-label="Back">‹</button><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="14" width="8" height="16" rx="2" fill="#ffc400"/><rect x="8" y="9" width="22" height="5" rx="2" fill="#fff"/><rect x="14" y="9" width="4" height="5" fill="#10203d"/><rect x="22" y="9" width="4" height="5" fill="#10203d"/></svg><h1>Sentinel</h1><span class="chip" id="chip"></span><button id="out" hidden data-act="logout" aria-label="Sign out" title="Sign out" style="font-size:15px">Sign out</button></header>
+<main id="app"><p>Loading…</p></main>
+<div id="modal" class="modal" hidden></div><div id="toast" class="toast" hidden role="status"></div>
+<script src="/shim.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TEAMS={security:'Security Team',inward:'Inward Team',dispatch:'Dispatch Team',safety:'Safety Team',hr:'HR Team'};
+const PURP={vehicle:['Unloading','Loading','Other'],visitor:['Meeting','Interview','Audit / Inspection','Service / Maintenance','Delivery','Other']};
+const IC={check:'<path d="M4 12l5 5L20 6"/>',truck:'<path d="M1 6h13v10H1zM14 9h4l4 4v3h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>',person:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',exit:'<path d="M9 4H4v16h5M16 8l4 4-4 4M20 12H9"/>',search:'<circle cx="10" cy="10" r="6"/><path d="M15 15l6 6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M2 20h20"/>',users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-5 7-5s7 1.5 7 5"/><circle cx="18" cy="9" r="2.5"/><path d="M18 14c2.5 0 4 1.2 4 4"/>'};
+let db,user,isSuper=false,uid=null,photo='';
+const S={entries:[],accounts:{},accLoaded:false,acc:null,sid:null,owner:false,view:'home',kind:'vehicle',q:'',tab:'all',ms:'all',open:{},tr:'',rt:'',m:{},pre:null,st:'all',fr:'',to:'',ready:false,err:'',lerr:'',cl:0};
+const me=()=>S.acc?{team:S.acc.team,role:S.acc.role==='super'?'admin':S.acc.role}:null;
+const isAdmin=()=>!!(me()&&me().role==='admin');
+const canAll=()=>isSuper||me()?.team==='security';
+const canCreate=()=>isSuper||me()?.team==='security';
+const scope=e=>{const t=me()?.team;return t==='dispatch'?e.kind==='vehicle'&&e.purpose==='Loading':t==='inward'?e.kind==='vehicle'&&e.purpose==='Unloading':t==='hr'?e.kind==='visitor':false};
+const vis=e=>canAll()||scope(e)||e.team===me()?.team;
+const full=e=>isAdmin()&&vis(e);
+const canAppr=e=>isSuper||(me()?.role==='admin'&&me().team===e.team);
+const fmt=t=>new Date(t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const dur=ms=>{const m=Math.max(0,Math.round(ms/6e4));return m>=60?Math.floor(m/60)+'h '+m%60+'m':m+'m'};
+const loc=t=>new Date(t-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16);
+const E=()=>S.entries.filter(vis);
+const topt=sel=>Object.entries(TEAMS).map(([k,v])=>`<option value="${k}" ${k===sel?'selected':''}>${v}</option>`).join('');
+const rnd=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+async function hash(pw,salt){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pw));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const roleName=a=>a.role==='super'?'Super Admin':(TEAMS[a.team]||'')+(a.role==='admin'?' · Admin':'');
+
+(async()=>{
+ try{db=await claude.use('db');user=await claude.use('user');S.owner=!!(user&&((await user.isOwner())||(await user.canEdit())))}catch(e){}
+ try{S.sid=JSON.parse(sessionStorage.getItem('gl')||'null')}catch(e){}
+ if(!db){S.err='Open this app while signed in to claude.ai (the owner must share it with Contributor access).';return render()}
+ setTimeout(()=>{if(!S.ready||!S.accLoaded){S.err='Cannot reach the data store yet. Data shown may be out of date.';render()}},10000);
+ const fail=e=>{S.err='Data error: '+(e.message||e.code);render()};
+ db.collection('accounts').onSnapshot(s=>{
+  S.accounts={};s.docs.forEach(d=>S.accounts[d.id]=d.data());S.accLoaded=true;
+  const a=window.ME&&S.accounts[window.ME.id];
+  if(a){S.acc={id:window.ME.id,...a};isSuper=a.role==='super';uid=window.ME.id}else{S.acc=null;isSuper=false;uid=null}
+  render()},fail);
+ db.doc('masters/lists').onSnapshot(s=>{S.m=s.exists?s.data():{};render()},fail);
+ const cut=Date.now()-30*864e5;
+ db.collection('entries').where('inAt','>=',cut).orderBy('inAt','desc').limit(1000).onSnapshot(s=>{S.entries=s.docs.map(d=>{const e={id:d.id,...d.data()};if(e.kind==='vehicle'){e.appr='approved';delete e.apprBy;delete e.apprName}return e});S.ready=true;S.err='';render()},fail);
+})();
+async function cleanup(){ // 30-day retention: delete records older than 31 days
+ if(S.cl||!isAdmin())return;S.cl=1;
+ try{const q=await db.collection('entries').where('inAt','<',Date.now()-31*864e5).limit(200).get();
+ for(const d of q.docs){try{await db.doc('photos/'+d.id).delete()}catch(e){}await db.doc('entries/'+d.id).delete()}}catch(e){}}
+
+const safe=f=>{try{return f()}catch(e){return '<div class="card">Error: '+esc(e.message)+'</div>'}};
+function tile(v,l,ic,c,sub=''){return `<button class="tile" style="--c:${c}" data-act="go" data-v="${v}"><i><svg viewBox="0 0 24 24">${IC[ic]}</svg></i><b>${l}</b><small>${sub}</small></button>`}
+function render(){
+ const a=$('#app'),m=me();$('#back').hidden=!m||S.view==='home';$('#out').hidden=!m;document.body.classList.toggle('auth',!m);
+ $('#chip').textContent=m?S.acc.name+' · '+roleName(S.acc):'';
+ if(!db){a.innerHTML=`<div class="card">${esc(S.err)}</div>`;return}
+ if(!S.accLoaded){a.innerHTML='<p class="sub">Loading…'+(S.err?' '+esc(S.err):'')+'</p>';return}
+ if(!m){a.innerHTML=safe(authView);return}
+ cleanup();
+ const f={home,form,inside:()=>listPage('Currently inside',1),rec:()=>listPage('Records (last 30 days)',0),mine:()=>listPage('My entries',2),dash,acc:access,appr:approvals,mst:masters}[S.view];
+ a.innerHTML=(S.err?`<div class="card">${esc(S.err)}</div>`:'')+safe(f);
+}
+function authView(){
+ const hasSuper=!!(window.STATUS&&window.STATUS.hasSuper);
+ const ill=`<svg class="ill" viewBox="0 0 320 150" aria-hidden="true"><defs><pattern id="hz" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="12" height="24" fill="#ffc400"/><rect x="12" width="12" height="24" fill="#10203d"/></pattern></defs><circle cx="262" cy="40" r="22" fill="#ffc400" opacity=".9"/><rect y="140" width="320" height="10" fill="#0b1a38"/><g transform="rotate(-16 70 100)"><rect x="66" y="94" width="236" height="12" rx="4" fill="url(#hz)"/></g><rect x="44" y="82" width="36" height="62" rx="7" fill="#ffc400"/><circle cx="62" cy="74" r="8" fill="#ff5a4d"/><g transform="translate(150,104)"><rect width="48" height="28" rx="4" fill="#4aa3ff"/><rect x="48" y="8" width="22" height="20" rx="4" fill="#ffc400"/><circle cx="13" cy="30" r="7" fill="#0b1a38" stroke="#7d93b8" stroke-width="2"/><circle cx="56" cy="30" r="7" fill="#0b1a38" stroke="#7d93b8" stroke-width="2"/></g></svg>`;
+ const top=`<div class="lg-top"><h1>SENTINEL</h1><p>Smart gate control · Every vehicle. Every visitor. Every approval.</p></div>${ill}`;
+ if(!hasSuper){
+  return top+(S.owner?`<div class="lg-card"><h2>First-time setup</h2><p class="sub">Create the Super Admin login. It creates every other user and admin.</p><label>Setup key (from your Render environment settings)</label><input id="s_key" type="password" autocomplete="off"><label>Full name</label><input id="s_n"><label>Super Admin user ID</label><input id="s_id" autocapitalize="none" placeholder="e.g. superadmin"><label>PIN (4–6 digits)</label><input id="s_pw" type="password" inputmode="numeric" maxlength="6"><button class="btn y" data-act="setup">Create Super Admin</button></div>`
+  :`<div class="lg-card"><h2>Setup pending</h2><p class="sub">The app owner has to create the Super Admin login first. Please check back shortly.</p></div>`)}
+ return top+`<div class="lg-card"><h2>Sign in</h2><label>User ID</label><input id="l_id" autocapitalize="none" autocomplete="username"><label>PIN</label><input id="l_pw" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password">${S.lerr?`<p style="color:var(--r);margin:10px 0 0;font-weight:600">${esc(S.lerr)}</p>`:''}<button class="btn y" data-act="login">Sign in</button><p class="note">Ask the Super Admin for your user ID and PIN.</p></div>`}
+function home(){
+ const A=E(),I=A.filter(e=>!e.outAt&&e.appr!=='pending'&&e.appr!=='rejected'),h=new Date().getHours();
+ const greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+ let t='';
+ if(canCreate())t+=tile('v:vehicle','Vehicle Entry','truck','#1f9d5c','Loading, unloading, other')+tile('v:visitor','Visitor Entry','person','#1f9d5c','Pass number and photo')+tile('mine','My Entries','check','#7a5cc9','Track approvals');
+ t+=tile('inside',canCreate()?'Inside / Exit':'Currently Inside','exit','#d93f33','Who is on site now')+tile('rec','Records','search','#44546f','Last 30 days');
+ if(isAdmin()){const n=A.filter(e=>e.appr==='pending'&&canAppr(e)).length;t+=tile('appr','Approvals','check','#c58a00',n?n+' waiting':'All clear')+tile('dash','Dashboard','chart','#1f6fe0','Live counts')}
+ if(isSuper)t+=tile('acc','Users &amp; Admins','users','#16315c','Logins and PINs')+tile('mst','Transporters &amp; Routes','truck','#0f766e','Dropdown lists');
+ return `<section class="hero"><small>${greet}</small><h2>${esc(S.acc.name)}</h2><small>${esc(roleName(S.acc))}</small><div class="kp"><div><b>${I.filter(e=>e.kind==='vehicle').length}</b><span>Vehicles inside now</span></div><div><b>${I.filter(e=>e.kind==='visitor').length}</b><span>Visitors inside now</span></div><div><b>${A.filter(e=>e.appr==='pending').length}</b><span>Awaiting approval</span></div></div><small>Live totals right now, not daily counts. Entries count as inside only after approval.</small></section><div class="tiles">${t}</div><p class="note">Records are kept for 30 days and then deleted automatically. Only admins see contact details and photos.</p>`}
+function form(){
+ const k=S.kind,v=k==='vehicle';
+ return `<h2>${v?'Vehicle entry':'Visitor entry'}</h2><p class="sub" style="margin:0 0 8px">All fields and the photo are compulsory.</p><div class="card">
+ <label>${v?'Driver name':'Visitor name'}</label><input id="f_name" autocomplete="off">
+ ${v?`<label>Transporter</label><select id="f_co">${selOpts(S.m.transporters||[],'Select transporter')}</select><label>Route</label><select id="f_rt">${selOpts(S.m.routes||[],'Select route')}</select>`:'<label>Company / Vendor</label><input id="f_co">'}
+ <label>${v?'Contact number':'Mobile number (10 digits)'}</label><input id="f_ct" type="tel" inputmode="numeric" maxlength="${v?15:14}" placeholder="${v?'':'e.g. 98765 43210'}">
+ ${v?'<label>Vehicle number</label><input id="f_vn" style="text-transform:uppercase">':''}
+ ${v?'':'<label>Visitor pass number</label><input id="f_pn" autocomplete="off">'}
+ <label>Purpose of visit</label><select id="f_pu">${PURP[k].map(p=>`<option>${p}</option>`).join('')}</select>
+ <label>Person to contact</label><input id="f_me">
+ <label>${v?'Team':'Approval by team'}</label><select id="f_tm">${topt(v?'inward':'hr')}</select>
+ <label>In time (change if needed)</label><input id="f_in" type="datetime-local" value="${loc(Date.now())}">
+ <label>Live photo of ${v?'vehicle':'visitor'} (required)</label><button class="btn ghost" id="camb" data-act="cam" style="width:100%;margin-top:0">📷 Open camera &amp; take photo</button><input id="f_ph" type="file" accept="image/*" capture="environment" hidden><img id="prev" class="prev" hidden alt="">
+ <button class="btn green" data-act="save">${v?'Save entry &amp; send for approval':'Save entry'}</button></div>`}
+const pill=e=>e.appr==='pending'?'<span class="pill wait">Awaiting approval</span>':e.appr==='rejected'&&!e.outAt?'<span class="pill rej">Rejected</span>':`<span class="pill ${e.outAt?'out':'in'}">${e.outAt?'Out':'Inside'}</span>`;
+function card(e){
+ const f=full(e),inn=!e.outAt,open=S.open[e.id]||S.view==='appr',pend=e.appr==='pending'&&canAppr(e);
+ const sub=(e.kind==='vehicle'?esc(e.vehicleNo||'—'):'Visitor'+(e.pass?' · Pass '+esc(e.pass):''))+' · '+esc(e.company||'—');
+ const st=e.appr==='pending'?'Pending':e.appr==='rejected'?'Rejected':'Approved';
+ const det=open?`<div class="det"><div class="meta">Routed to ${TEAMS[e.team]}</div>${e.kind==='vehicle'?'':''}<div class="meta">Approval: ${st}</div><div class="meta">${inn?dur(Date.now()-e.inAt)+' inside':'Out '+fmt(e.outAt)}</div>${f?`<div class="meta">Phone ${esc(e.contact)}</div><div class="meta">Meets ${esc(e.meet||'—')}</div><button class="btn sm ghost" data-act="photo" data-id="${e.id}">View photo</button>`:''}</div>`:'';
+ const btns=(pend?`<button class="btn big green" data-act="ap" data-id="${e.id}" data-r="approved">Approve</button><button class="btn big red" data-act="ap" data-id="${e.id}" data-r="rejected">Reject</button>`:'')+(inn&&canCreate()?`<button class="btn big red" data-act="out" data-id="${e.id}">Mark out</button>`:'');
+ return `<div class="card ${e.appr==='pending'?'s-w':e.appr==='rejected'&&inn?'s-r':inn?'s-i':'s-o'}"><div class="cr"><div class="ci"><div class="top"><b>${esc(e.name)}</b>${pill(e)}</div><div class="sub">${sub}</div>${e.route?`<div class="meta"><b>Route:</b> ${esc(e.route)}</div>`:''}<div class="meta">${esc(e.purpose)} · In ${fmt(e.inAt)}</div>${(e.appr==='approved'||e.appr==='rejected')&&e.apprBy?`<div class="meta ap ${e.appr==='rejected'?'no':''}">${e.appr==='approved'?'✓ Approved by':'✕ Rejected by'} <b>${esc(e.apprName||S.accounts[e.apprBy]?.name||e.apprBy)}</b>${e.apprAt?' · '+fmt(e.apprAt):''}</div>`:''}${det}${S.view==='appr'?'':`<button class="btn sm ghost" data-act="det" data-id="${e.id}">${open?'Hide details':'See details'}</button>`}</div>${btns?`<div class="cb">${btns}</div>`:''}</div></div>`}
+const TABS=[['all','All'],['unloading','Unloading'],['loading','Loading'],['visitor','Visitors'],['other','Other vehicles']];
+const tabOk=e=>S.tab==='all'||(S.tab==='visitor'?e.kind==='visitor':S.tab==='other'?e.kind==='vehicle'&&e.purpose==='Other':e.kind==='vehicle'&&e.purpose.toLowerCase()===S.tab);
+const preOk=e=>{const p=S.pre;return(!p.k||e.kind===p.k)&&(!p.p||e.purpose===p.p)&&(!p.d||e.inAt>=new Date().setHours(0,0,0,0))&&(!p.i||(!e.outAt&&e.appr!=='pending'&&e.appr!=='rejected'))&&(!p.w||e.appr==='pending')&&(!p.t||e.team===p.t)&&(!p.tr||e.company===p.tr)};
+const msOk=e=>S.ms==='all'||(S.ms==='pending'?e.appr==='pending':S.ms==='rejected'?e.appr==='rejected':e.appr!=='pending'&&e.appr!=='rejected');
+const tabsFor=()=>(!canAll()&&['dispatch','inward','hr'].includes(me().team))?[['all','All']]:TABS;
+const selOpts=(arr,ph,cur)=>`<option value="">${arr.length?ph:'None added – ask Super Admin'}</option>`+arr.map(x=>`<option ${x===cur?'selected':''}>${esc(x)}</option>`).join('');
+const fopts=(key,field)=>[...new Set([...(S.m[key]||[]),...S.entries.filter(vis).filter(e=>e.kind==='vehicle'&&e[field]).map(e=>e[field])])].sort();
+function list(mode){
+ const q=S.q.toLowerCase();
+ return E().filter(e=>(mode!==1||!e.outAt)&&(mode!==2||(e.by===uid&&msOk(e)))&&(mode===2||(tabOk(e)&&(!S.tr||e.company===S.tr)&&(!S.rt||e.route===S.rt)))&&(mode!==0||!S.pre||preOk(e))&&(mode!==0||((!S.fr||e.inAt>=new Date(S.fr+'T00:00:00').getTime())&&(!S.to||e.inAt<=new Date(S.to+'T23:59:59').getTime())&&(S.st==='all'||(S.st==='in')===!e.outAt)))&&(!q||[e.name,e.company,e.route,e.vehicleNo,e.pass,e.purpose,full(e)?e.contact:''].join(' ').toLowerCase().includes(q)))}
+function rows(mode){const L=list(mode);return `<p class="sub"><b>${L.length}</b> ${L.length===1?'entry':'entries'}${S.tr?' · '+esc(S.tr):''}${S.rt?' · '+esc(S.rt):''}</p>`+(L.map(card).join('')||'<p class="sub">Nothing to show.</p>')}
+function listPage(t,mode){
+ const tb=(arr,act,cur)=>arr.length<2?'':`<div class="tabs">${arr.map(([k,l])=>`<button data-act="${act}" data-t="${k}" class="${cur===k?'on':''}">${l}</button>`).join('')}</div>`;
+ const veh=canAll()||['inward','dispatch','safety'].includes(me().team);
+ return `<h2>${t}</h2>${mode===0&&S.pre?`<div class="card top" style="margin:0 0 10px"><span>Showing: <b>${esc(S.pre.l)}</b></span><span><button class="btn sm ghost" data-act="go" data-v="dash" style="margin:0 6px 0 0">Dashboard</button><button class="btn sm ghost" data-act="clr" style="margin:0">Clear</button></span></div>`:''}<input id="q" placeholder="Search name, transporter, route, vehicle or pass no." value="${esc(S.q)}">
+ ${mode===2?tb([['all','All'],['pending','Pending'],['approved','Approved'],['rejected','Rejected']],'mtab',S.ms):tb(tabsFor(),'tab',S.tab)}
+ ${mode!==2&&veh?`<div class="row" style="margin-bottom:8px"><select id="ftr"><option value="">All transporters</option>${fopts('transporters','company').map(x=>`<option ${x===S.tr?'selected':''}>${esc(x)}</option>`).join('')}</select><select id="frt"><option value="">All routes</option>${fopts('routes','route').map(x=>`<option ${x===S.rt?'selected':''}>${esc(x)}</option>`).join('')}</select></div>`:''}
+ ${mode!==0?'':`<select id="st" style="margin:0 0 8px"><option value="all">All</option><option value="in" ${S.st==='in'?'selected':''}>Inside</option><option value="out" ${S.st==='out'?'selected':''}>Exited</option></select>
+ <div class="row"><label style="margin:0">From</label><input id="d1" type="date" value="${S.fr}" style="flex:1"><label style="margin:0">To</label><input id="d2" type="date" value="${S.to}" style="flex:1"></div>`}
+ <div id="list" style="margin-top:10px" data-mode="${mode}">${rows(mode)}</div>`}
+function approvals(){const P=E().filter(e=>e.appr==='pending'&&canAppr(e));return `<h2>Awaiting your approval</h2>${P.map(card).join('')||'<p class="sub">No pending approvals.</p>'}`}
+function dash(){
+ const d0=new Date().setHours(0,0,0,0),A=E(),T=A.filter(e=>e.inAt>=d0),I=A.filter(e=>!e.outAt&&e.appr!=='pending'&&e.appr!=='rejected');
+ const tm=canAll()?'':me().team,only=['inward','dispatch','hr'].includes(tm);
+ const sU=!only||tm==='inward',sL=!only||tm==='dispatch',sV=!only||tm==='hr',sVeh=sU||sL;
+ const pa=p=>`data-act="dd" data-pre='${esc(JSON.stringify(p))}'`;
+ const c=(l,n,col,p)=>`<button class="stat" style="--c:${col}" ${pa({...p,l})}><b>${n}</b><span>${l}</span></button>`;
+ const n=(arr,k,p)=>arr.filter(e=>k==='visitor'?e.kind==='visitor':e.kind==='vehicle'&&e.purpose===p).length;
+ const byTeam=canAll()?Object.entries(TEAMS).map(([k,v])=>`<div class="card top" style="cursor:pointer" ${pa({t:k,l:v+' – last 30 days'})}><span>${v}</span><span>${I.filter(e=>e.team===k).length} inside · ${T.filter(e=>e.team===k).length} today ›</span></div>`).join(''):'';
+ const V=A.filter(e=>e.kind==='vehicle'),tr={};V.forEach(e=>{const k=e.company||'—';(tr[k]=tr[k]||{t:0,i:0,m:0});tr[k].m++;if(e.inAt>=d0)tr[k].t++;if(!e.outAt&&e.appr!=='pending'&&e.appr!=='rejected')tr[k].i++});
+ const trRows=Object.entries(tr).sort((a,b)=>b[1].m-a[1].m).map(([k,x])=>`<div class="card top" style="cursor:pointer" ${pa({tr:k,k:'vehicle',l:k+' – last 30 days'})}><b>${esc(k)}</b><span>${x.t} today · ${x.i} inside · ${x.m} in 30 days ›</span></div>`).join('');
+ return `<p class="sub" style="margin:0">Tap any box to see the matching records.</p><h2>Today</h2><div class="stats">${sU?c('Vehicles for unloading',n(T,'v','Unloading'),'#1f9d5c',{k:'vehicle',p:'Unloading',d:1}):''}${sL?c('Vehicles for loading',n(T,'v','Loading'),'#f2b705',{k:'vehicle',p:'Loading',d:1}):''}${sV?c('Visitors reported',n(T,'visitor'),'#1f6fe0',{k:'visitor',d:1}):''}${c('All entries today',T.length,'#44546f',{d:1})}</div>
+ <h2>Currently inside</h2><div class="stats">${sVeh?c('Vehicles inside',I.filter(e=>e.kind==='vehicle').length,'#d93f33',{k:'vehicle',i:1}):''}${sV?c('Visitors inside',I.filter(e=>e.kind==='visitor').length,'#d93f33',{k:'visitor',i:1}):''}${sV?c('Awaiting approval',A.filter(e=>e.appr==='pending').length,'#b07d00',{w:1}):''}</div>
+ ${sVeh&&trRows?`<h2>By transporter</h2>${trRows}`:''}${byTeam?`<h2>By team</h2>${byTeam}`:''}
+ <h2>Last 30 days</h2><div class="stats">${sVeh?c('Vehicles',V.length,'#44546f',{k:'vehicle'}):''}${sV?c('Visitors',A.filter(e=>e.kind==='visitor').length,'#44546f',{k:'visitor'}):''}</div>`}
+function masters(){
+ const sec=(k,t,ph)=>`<h2>${t}</h2><div class="card"><div class="row"><input id="m_${k}" placeholder="${ph}" style="flex:2;min-width:160px"><button class="btn green sm" data-act="madd" data-k="${k}" style="margin:0">Add</button></div>${(S.m[k]||[]).map((x,i)=>`<div class="top" style="padding:9px 0;border-top:1px solid var(--line);margin-top:8px"><span>${esc(x)}</span><button class="btn sm red" data-act="mdel" data-k="${k}" data-i="${i}" style="margin:0">Delete</button></div>`).join('')||'<p class="sub" style="margin:10px 0 0">Nothing added yet.</p>'}</div>`;
+ return sec('transporters','Transporters','e.g. Tej, SSPL')+sec('routes','Routes','e.g. Pune – Mumbai')+'<p class="note">These appear as dropdowns in Vehicle Entry. Deleting an item does not change old records.</p>'}
+function access(){
+ const list=Object.entries(S.accounts).sort((a,b)=>a[0]<b[0]?-1:1).map(([k,a])=>`<div class="card"><div class="top"><b>${esc(a.name)}</b><span class="sub">${esc(k)}</span></div><div class="sub">${esc(roleName(a))}</div>${a.role==='super'?'':`<button class="btn sm ghost" data-act="tog" data-id="${k}">Make ${a.role==='admin'?'member':'team admin'}</button>`}<button class="btn sm ghost" data-act="pw" data-id="${k}">Reset PIN</button>${a.role==='super'?'':`<button class="btn sm red" data-act="rm" data-id="${k}">Remove</button>`}</div>`).join('');
+ return `<h2>Create a user or admin</h2><div class="card"><label>Full name</label><input id="n_n"><label>User ID (letters, numbers, . _ -)</label><input id="n_id" autocapitalize="none"><label>PIN (4–6 digits)</label><input id="n_pw" type="text" inputmode="numeric" maxlength="6" autocomplete="off"><label>Team</label><select id="n_t">${topt()}</select><label>Role</label><select id="n_r"><option value="member">Member (their team only)</option><option value="admin">Team Admin (approvals, dashboard, full details)</option></select><button class="btn green" data-act="create">Create login</button></div><h2>All logins</h2>${list}`}
+
+function modal(h){const m=$('#modal');m.innerHTML=`<div>${h}</div>`;m.hidden=false}
+let stream;
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+const close=()=>{stopCam();$('#modal').hidden=true};
+function shot(src){photo=src;const p=$('#prev');if(p){p.src=src;p.hidden=false}const c=$('#camb');if(c)c.textContent='📷 Retake photo'}
+async function openCam(){
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+  modal('<video id="cv" autoplay playsinline muted style="width:100%;border-radius:12px;background:#000"></video><div class="row" style="margin-top:12px"><button class="btn green" data-act="snap" style="flex:1;margin:0">Capture</button><button class="btn ghost" data-act="close" style="margin:0">Cancel</button></div>');
+  $('#cv').srcObject=stream}
+ catch(e){stopCam();$('#f_ph').click()}}
+let tt;const toast=(m,ok=true)=>{const t=$('#toast');t.textContent=(ok?'✓ ':'✕ ')+m;t.className='toast '+(ok?'ok':'bad');t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>{t.hidden=true},3500)};
+const note=t=>modal(`<p>${esc(t)}</p><button class="btn" data-act="close">OK</button>`);
+function shrink(file){return new Promise(r=>{const fr=new FileReader();fr.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,640/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.6))};i.src=fr.result};fr.readAsDataURL(file)})}
+async function makeAcc(id,name,pw,team,role){const r=await fetch('/api/accounts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id,name,pin:pw,team,role})});if(!r.ok)throw new Error((await r.json().catch(()=>({}))).error||'Request failed')}
+const okPin=p=>/^\d{4,6}$/.test(p);
+const okId=s=>/^[a-z0-9._-]{3,30}$/.test(s);
+document.addEventListener('change',async e=>{
+ const t=e.target;
+ if(t.id==='f_ph'&&t.files[0]){shot(await shrink(t.files[0]));toast('Photo captured')}
+ if(t.id==='f_pu'){const p=t.value;$('#f_tm').value=S.kind==='visitor'?'hr':p==='Unloading'?'inward':p==='Loading'?'dispatch':'security'}
+ if(t.id==='ftr'||t.id==='frt'){S[t.id==='ftr'?'tr':'rt']=t.value;$('#list').innerHTML=rows(+$('#list').dataset.mode)}
+ if(t.id==='st'){S.st=t.value;$('#list').innerHTML=rows(0)}
+ if(t.id==='d1'||t.id==='d2'){S[t.id==='d1'?'fr':'to']=t.value;$('#list').innerHTML=rows(0)}
+});
+document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;$('#list').innerHTML=rows(+$('#list').dataset.mode)}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='l_pw'||e.target.id==='l_id'))document.querySelector('[data-act=login]')?.click()});
+document.addEventListener('click',async e=>{
+ const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id,v=b.dataset;
+ try{
+ if(a==='go'){if(v.v.startsWith('v:')){S.kind=v.v.slice(2);S.view='form';photo=''}else S.view=v.v;S.q='';S.tab='all';S.ms='all';S.tr='';S.rt='';S.pre=null;render()}
+ else if(a==='dd'){S.pre=JSON.parse(v.pre);S.fr='';S.to='';S.st='all';S.tab='all';S.q='';S.tr='';S.rt='';S.view='rec';render();window.scrollTo(0,0)}
+ else if(a==='clr'){S.pre=null;render()}
+ else if(a==='det'){S.open[id]=!S.open[id];const l=$('#list');l?l.innerHTML=rows(+l.dataset.mode):render()}
+ else if(a==='mtab'){S.ms=v.t;render()}
+ else if(a==='madd'){const k=v.k,val=($('#m_'+k).value||'').trim();if(!val)return toast('Enter a name first',false);const cur=[...(S.m[k]||[])];if(cur.some(x=>x.toLowerCase()===val.toLowerCase()))return toast('Already in the list',false);cur.push(val);await db.doc('masters/lists').set({...S.m,[k]:cur});toast('Added '+val)}
+ else if(a==='mdel'){const k=v.k,cur=[...(S.m[k]||[])],x=cur.splice(+v.i,1);await db.doc('masters/lists').set({...S.m,[k]:cur});toast('Deleted '+x[0])}
+ else if(a==='tab'){S.tab=v.t;render()}
+ else if(a==='close')close();
+ else if(a==='cam')openCam();
+ else if(a==='snap'){const vd=$('#cv'),k=Math.min(1,640/Math.max(vd.videoWidth,vd.videoHeight)),c=document.createElement('canvas');c.width=vd.videoWidth*k;c.height=vd.videoHeight*k;c.getContext('2d').drawImage(vd,0,0,c.width,c.height);shot(c.toDataURL('image/jpeg',.6));close();toast('Photo captured')}
+ else if(a==='logout'){await fetch('/api/logout',{method:'POST'});location.reload()}
+ else if(a==='login'){
+  const i=($('#l_id').value||'').trim().toLowerCase();
+  const r=await fetch('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:i,pin:$('#l_pw').value})});
+  if(!r.ok){const j=await r.json().catch(()=>({}));S.lerr=j.error||'Wrong user ID or PIN.';render();toast('Sign-in failed',false);return}
+  location.reload()}
+ else if(a==='setup'){
+  const n=$('#s_n').value.trim(),i=$('#s_id').value.trim().toLowerCase(),p=$('#s_pw').value;
+  if(!n||!okId(i)||!okPin(p))return note('Enter a name, an ID (3-30 letters/numbers/. _ -) and a PIN of 4 to 6 digits.');
+  const r=await fetch('/api/setup',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:i,name:n,pin:p,key:$('#s_key').value})});if(!r.ok)return note((await r.json().catch(()=>({}))).error||'Setup failed');window.STATUS={hasSuper:true};render();toast('Super Admin created. Sign in now.')}
+ else if(a==='create'){
+  const n=$('#n_n').value.trim(),i=$('#n_id').value.trim().toLowerCase(),p=$('#n_pw').value;
+  if(!n||!okId(i)||!okPin(p))return note('Enter a name, an ID (3-30 letters/numbers/. _ -) and a PIN of 4 to 6 digits.');
+  if(S.accounts[i])return note('That user ID already exists.');
+  await makeAcc(i,n,p,$('#n_t').value,$('#n_r').value);toast('Created '+n+'. Share the ID and PIN with them.')}
+ else if(a==='tog'){await db.doc('accounts/'+id).update({role:S.accounts[id].role==='admin'?'member':'admin'});toast('Role updated')}
+ else if(a==='pw'){modal(`<b>Reset PIN – ${esc(S.accounts[id].name)}</b><label>New PIN (4–6 digits)</label><input id="np" type="text" inputmode="numeric" maxlength="6" autocomplete="off"><button class="btn green" data-act="pwok" data-id="${id}">Save</button> <button class="btn ghost" data-act="close">Cancel</button>`)}
+ else if(a==='pwok'){const p=$('#np').value;if(!okPin(p))return note('PIN must be 4 to 6 digits.');await db.doc('accounts/'+id).update({pin:p});close();toast('PIN updated')}
+ else if(a==='rm'){modal(`<b>Remove ${esc(S.accounts[id].name)}?</b><p class="sub">They will be signed out and can no longer log in.</p><button class="btn red" data-act="rmok" data-id="${id}">Remove</button> <button class="btn ghost" data-act="close">Cancel</button>`)}
+ else if(a==='rmok'){await db.doc('accounts/'+id).delete();close();toast('User removed')}
+ else if(a==='ap'){await db.doc('entries/'+id).update({appr:v.r,apprBy:uid,apprName:S.acc.name,apprAt:Date.now()});toast(v.r==='approved'?'Entry approved':'Entry rejected')}
+ else if(a==='photo'){modal('<p class="sub">Loading photo…</p>');const s=await db.doc('photos/'+id).get();modal((s.exists?`<img src="${s.data().d}" alt="Captured photo">`:'<p>No photo was captured.</p>')+'<button class="btn ghost" data-act="close">Close</button>')}
+ else if(a==='out'){modal(`<b>Mark out – ${esc(S.entries.find(x=>x.id===id).name)}</b><label>Out time (change if needed)</label><input id="o_t" type="datetime-local" value="${loc(Date.now())}"><button class="btn red" data-act="outok" data-id="${id}">Confirm out</button> <button class="btn ghost" data-act="close">Cancel</button>`)}
+ else if(a==='outok'){const t=new Date($('#o_t').value).getTime()||Date.now();await db.doc('entries/'+id).update({outAt:t,outBy:uid});close();toast('Marked out')}
+ else if(a==='save'){
+  const g=i=>($('#'+i)?.value||'').trim(),k=S.kind;
+  const need=['f_name','f_co','f_ct','f_pu','f_me','f_tm',...(k==='vehicle'?['f_vn','f_rt']:['f_pn'])];if(need.some(x=>!g(x)))return toast('Please fill all the fields',false);if(!photo)return toast('Please capture the photo',false);
+  const cph=g('f_ct').replace(/[\s-]/g,'').replace(/^(\+91|91|0)(?=\d{10}$)/,'');
+  if(k==='visitor'){if(!/^[6-9]\d{9}$/.test(cph))return toast('Enter a valid 10-digit mobile number',false);const dup=S.entries.find(e=>e.kind==='visitor'&&!e.outAt&&e.contact===cph&&e.appr!=='rejected');if(dup)return toast('This number is already inside as '+dup.name,false)}
+  b.disabled=true;const eid=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  await db.doc('photos/'+eid).set({d:photo});
+  await db.doc('entries/'+eid).set({kind:k,name:g('f_name'),company:g('f_co'),contact:k==='visitor'?cph:g('f_ct'),vehicleNo:g('f_vn').toUpperCase(),pass:g('f_pn'),route:g('f_rt'),purpose:g('f_pu'),meet:g('f_me'),team:g('f_tm'),inAt:new Date($('#f_in').value).getTime()||Date.now(),outAt:null,by:uid,appr:k==='visitor'?'pending':'approved'});
+  photo='';S.view='mine';S.ms='all';render();toast(k==='visitor'?'Visitor entry saved and sent for approval':'Vehicle entry saved')}
+ }catch(err){toast('Failed: '+(err.message||err.code||err),false);b.disabled=false}
+});
+render();
+</script></body></html>
