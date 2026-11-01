@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: pi-verify
+    runtime: node
+    plan: starter            # use a plan that stays awake
+    buildCommand: npm install
+    startCommand: node start.js
+    envVars:
+      - key: DATABASE_URL    # Internal Database URL of your Render Postgres (paste it in the dashboard)
+        sync: false
+      - key: DB_SCHEMA       # keeps PI Verify's tables separate if the database is shared with other apps
+        value: piverify

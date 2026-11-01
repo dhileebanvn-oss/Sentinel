@@ -1,0 +1,13 @@
+{
+ "name": "pi-verify",
+ "version": "1.3.0",
+ "scripts": {
+  "start": "node start.js"
+ },
+ "engines": {
+  "node": ">=18"
+ },
+ "dependencies": {
+  "pg": "^8.11.5"
+ }
+}
